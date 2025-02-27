@@ -23,7 +23,7 @@
                    <td>{{ student.course }}</td>
                    <td>{{ student.email }}</td>
                    <td>{{ student.phone }}</td>
-                   <td>{{ student.created_at }}</td>
+                   <td>{{ formatDate(student.created_at) }}</td>
                    <td>
                       <RouterLink :to="{path:'edit/'+student.id}" class="btn btn-warning btn-sm">Update</RouterLink>
                       <button type="button" @click="deleteStudent(student.id)" class="btn btn-danger btn-sm">Delete</button>
@@ -32,7 +32,7 @@
             </tbody>
             <tbody v-else>
                 <tr>
-                    <td colspan="6">Loading...</td>
+                    <td colspan="6">No Data</td>
                 </tr>
             </tbody>
         </table>
@@ -41,6 +41,7 @@
   </template>
   <script>
    import axios from 'axios';
+   import moment from "moment";
    export default {
     name: 'students',
     data(){
@@ -54,8 +55,11 @@
     methods: {
       getStudents(){
         axios.get('http://127.0.0.1:8000/api/student').then(res => {
-           this.students = res.data.students;
-           console.log(this.students);
+            if (res.data.status === 404) {
+                this.students = [];
+            } else {
+                this.students = Array.isArray(res.data.students) ? res.data.students : [];
+            }
         });
       },
       deleteStudent(studentId){
@@ -71,6 +75,9 @@
                 }
             });
         }
+      },
+      formatDate(dateString) {
+        return dateString ? moment(dateString).format("YYYY-MM-DD HH:mm:ss") : "N/A";
       }
     }
    }
